@@ -44,9 +44,9 @@ export type Expense = {
 }
 
 export class AppDB extends Dexie {
-  members!: Table<Member, 'id'>
-  groups!: Table<Group, 'id'>
-  expenses!: Table<Expense, 'id'>
+  members!: Table<Member, string>
+  groups!: Table<Group, string>
+  expenses!: Table<Expense, string>
 
   constructor() {
     super('splitBill')
