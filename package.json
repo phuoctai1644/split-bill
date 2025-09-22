@@ -15,11 +15,13 @@
     "test": "jest --passWithNoTests"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.89.0",
     "date-fns": "^4.1.0",
     "dexie": "^4.0.11",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-hook-form": "^7.62.0",
+    "react-router-dom": "^7.9.1",
     "zod": "^4.0.17",
     "zustand": "^5.0.7"
   },
