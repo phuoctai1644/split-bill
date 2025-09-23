@@ -37,7 +37,7 @@ export type Expense = {
   currency: Currency
   paidBy: string
   date: string
-  note: string
+  note?: string
   splitMode: 'equal' | 'weights' | 'exact'
   weights?: Record<string, number>
   exacts?: Record<string, number>

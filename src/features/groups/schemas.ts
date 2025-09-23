@@ -1,8 +1,9 @@
 import { z } from 'zod';
+import { Currency } from '@/services/db';
 
 export const groupForm = z.object({
   name: z.string().trim().min(1, 'Nhập tên nhóm'),
-  currency: z.enum(['VND', 'USD', 'EUR']),
+  currency: z.nativeEnum(Currency),
 });
 export type GroupForm = z.infer<typeof groupForm>;
 

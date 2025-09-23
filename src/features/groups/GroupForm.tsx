@@ -1,8 +1,9 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { groupForm, type GroupForm } from './schemas';
+import { Currency } from '@/services/db';
 
-const CURRENCIES = ['VND', 'USD', 'EUR'] as const;
+const CURRENCIES = Object.values(Currency);
 
 export function GroupFormModal({
   initial,
