@@ -1,10 +1,10 @@
 import { useParams } from 'react-router-dom';
 import { useMembers } from '@/hooks/useMembers';
 import { useExpenses, useCreateExpense } from '@/hooks/useExpenses';
-import { AddExpenseEqualModal } from '@/features/expenses/AddExpenseEqualModal';
 import { useState } from 'react';
 import { useGroup } from '@/hooks/useGroups';
 import { formatMoney } from '@/utils/money';
+import { AddExpenseModal } from '@/features/expenses/AddExpenseModal';
 
 export function ExpensesPage() {
   const { id: groupId } = useParams();
@@ -20,8 +20,9 @@ export function ExpensesPage() {
     <div className="space-y-4">
       <section className="flex items-center justify-between">
         <h2 className="font-semibold text-gray-800">Chi tiêu</h2>
+       
         <button onClick={() => setShow(true)} className="px-3 py-2 rounded-xl bg-gray-900 text-white text-sm">
-          Thêm (Đều)
+          Thêm
         </button>
       </section>
 
@@ -47,12 +48,12 @@ export function ExpensesPage() {
 
       {expenses.length === 0 && (
         <div className="p-6 text-center text-gray-500 bg-white rounded-2xl">
-          Chưa có chi tiêu nào. Nhấn “Thêm (Đều)”.
+          Chưa có chi tiêu nào. Nhấn “Thêm”.
         </div>
       )}
 
       {show && (
-        <AddExpenseEqualModal
+        <AddExpenseModal
           currency={group.currency}
           members={members}
           onClose={() => setShow(false)}

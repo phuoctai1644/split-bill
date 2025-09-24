@@ -14,3 +14,15 @@ export function largestRemainder(total: number, weights: number[]): number[] {
 export function equalSplit(total: number, n: number): number[] {
   return largestRemainder(total, Array.from({length:n}, () => 1));
 }
+
+export function weightsSplit(total: number, weights: number[]): number[] {
+  const cleaned = weights.map((w) => Math.max(0, Number.isFinite(w) ? w : 0));
+  const sum = cleaned.reduce((a,b)=>a+b,0);
+  if (sum <= 0) return weights.map(() => 0);
+  return largestRemainder(total, cleaned);
+}
+
+export function sumEquals(total: number, parts: number[]): boolean {
+  const s = parts.reduce((a,b)=>a + (Number.isFinite(b) ? b : 0), 0);
+  return s === total;
+}
