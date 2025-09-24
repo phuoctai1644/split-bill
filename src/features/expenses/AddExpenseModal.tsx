@@ -16,12 +16,12 @@ export function AddExpenseModal({
   onClose: () => void;
   onSave: (payload: {
     title: string; amount: number; currency: Currency; paidBy: string; date: string; note?: string;
-    splitMode: 'equal'|'weights'|'exact';
+    splitMode: 'equal' | 'weights' | 'exact';
     weights?: Record<string, number>;
     exacts?: Record<string, number>;
   }) => void;
 }) {
-  const [mode, setMode] = useState<'equal'|'weights'|'exact'>('equal');
+  const [mode, setMode] = useState<'equal' | 'weights' | 'exact'>('equal');
 
   const { register, handleSubmit, watch, setValue, formState: { errors, isSubmitting } } =
     useForm<ExpenseAnyForm>({
@@ -30,7 +30,7 @@ export function AddExpenseModal({
         title: '',
         amountMajor: 0,
         paidBy: members[0]?.id ?? '',
-        date: new Date().toISOString().slice(0,10),
+        date: new Date().toISOString().slice(0, 10),
         note: '',
         splitMode: 'equal',
         weights: Object.fromEntries(members.map(m => [m.id, 1])),
@@ -41,12 +41,18 @@ export function AddExpenseModal({
   // keep form splitMode synced with local mode toggle
   const onSwitch = (m: typeof mode) => {
     setMode(m);
-    setValue('splitMode', m as any, { shouldValidate: true });
+    setValue('splitMode', m as any);
   };
 
   const amountMinor = toMinor(Number(watch('amountMajor') || 0), currency);
-  const weights = watch('weights') || {};
-  const exactsMajor = watch('exactsMajor') || {};
+  const weights = members.reduce((acc, m) => {
+    acc[m.id] = watch(`weights.${m.id}`);
+    return acc;
+  }, {} as Record<string, number>);
+  const exactsMajor = members.reduce((acc, m) => {
+    acc[m.id] = watch(`exactsMajor.${m.id}`);
+    return acc;
+  }, {} as Record<string, number>);
 
   const shares = useMemo(() => {
     if (amountMinor <= 0) return members.map(() => 0);
@@ -56,7 +62,7 @@ export function AddExpenseModal({
     return [];
   }, [mode, amountMinor, members, weights, exactsMajor, currency]);
 
-  const sumPreview = shares.reduce((a,b)=>a+b,0);
+  const sumPreview = shares.reduce((a, b) => a + b, 0);
   const exactOk = mode !== 'exact' || sumEquals(amountMinor, shares);
 
   const submit = handleSubmit((v) => {
@@ -122,9 +128,9 @@ export function AddExpenseModal({
         <div className="mt-3">
           <label className="text-sm text-gray-600">Cách chia</label>
           <div className="mt-1 grid grid-cols-3 gap-2">
-            {(['equal','weights','exact'] as const).map((m) => (
+            {(['equal', 'weights', 'exact'] as const).map((m) => (
               <button key={m} type="button" onClick={() => onSwitch(m)}
-                className={`px-3 py-2 rounded-xl border text-sm ${mode===m ? 'bg-gray-900 text-white':'bg-white'}`}>
+                className={`px-3 py-2 rounded-xl border text-sm ${mode === m ? 'bg-gray-900 text-white' : 'bg-white'}`}>
                 {m === 'equal' ? 'Đều' : m === 'weights' ? 'Trọng số' : 'Cụ thể'}
               </button>
             ))}
@@ -141,7 +147,8 @@ export function AddExpenseModal({
                 <div key={m.id} className="flex flex-col gap-1">
                   <label className="text-xs text-gray-500">{m.name}</label>
                   <input type="number" inputMode="numeric" className="px-2 py-1 rounded-lg border"
-                    {...register(`weights.${m.id}` as const, { valueAsNumber: true, min: 0 })} />
+                    {...register(`weights.${m.id}` as const, { valueAsNumber: true, min: 0 })}
+                    onChange={(e) => setValue(`weights.${m.id}`, Number(e.target.value))} />
                 </div>
               ))}
             </div>
@@ -158,11 +165,12 @@ export function AddExpenseModal({
                 <div key={m.id} className="flex flex-col gap-1">
                   <label className="text-xs text-gray-500">{m.name}</label>
                   <input type="number" step="any" className="px-2 py-1 rounded-lg border"
-                    {...register(`exactsMajor.${m.id}` as const, { valueAsNumber: true, min: 0 })} />
+                    {...register(`exactsMajor.${m.id}` as const, { valueAsNumber: true, min: 0 })}
+                    onChange={(e) => setValue(`exactsMajor.${m.id}`, Number(e.target.value))} />
                 </div>
               ))}
             </div>
-            <div className={`text-xs mt-2 ${exactOk ? 'text-emerald-600':'text-rose-600'}`}>
+            <div className={`text-xs mt-2 ${exactOk ? 'text-emerald-600' : 'text-rose-600'}`}>
               Tổng nhập: {formatMoney(sumPreview, currency)} / {formatMoney(amountMinor, currency)}
             </div>
           </div>
@@ -188,7 +196,7 @@ export function AddExpenseModal({
 
         <div className="flex gap-2 mt-4">
           <button type="button" onClick={onClose} className="flex-1 px-4 py-3 rounded-xl border">Huỷ</button>
-          <button disabled={isSubmitting || (mode==='exact' && !exactOk)}
+          <button disabled={isSubmitting || (mode === 'exact' && !exactOk)}
             className="flex-1 px-4 py-3 rounded-xl text-white bg-gray-900">
             Lưu
           </button>
