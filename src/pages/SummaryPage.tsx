@@ -3,6 +3,7 @@ import { useGroup } from '@/hooks/useGroups';
 import { useGroupBalances } from '@/hooks/useBalances';
 import { formatMoney } from '@/utils/money';
 import { sumPositive } from '@/utils/balance';
+import { useSettlement } from '@/hooks/useSettlement';
 
 export function SummaryPage() {
   const { id: groupId } = useParams();
@@ -12,7 +13,41 @@ export function SummaryPage() {
   if (!group) return null;
 
   const totalPaid = sumPositive(balances);
-  const currency = group.currency;
+  const { txns, ok, currency } = useSettlement(groupId);
+
+  if (!group) return null;
+
+  const copySettlement = async () => {
+    const name = group.name;
+    const lines = txns.map(t => {
+      const from = members.find(m => m.id === t.from)?.name ?? t.from;
+      const to   = members.find(m => m.id === t.to)?.name   ?? t.to;
+      return `${from} → ${to}: ${formatMoney(t.amount, currency!)}`;
+    });
+    const text = `Settlement cho "${name}":\n` + lines.join('\n');
+    try {
+      await navigator.clipboard.writeText(text);
+      alert('Đã copy settlement vào clipboard');
+    } catch {
+      alert('Không thể copy — hãy chọn tay');
+    }
+  };
+
+  const exportCSV = () => {
+    // CSV: from,to,amount
+    const header = 'from,to,amount\n';
+    const rows = txns.map(t => {
+      const from = members.find(m => m.id === t.from)?.name ?? t.from;
+      const to   = members.find(m => m.id === t.to)?.name   ?? t.to;
+      // xuất số minor (chính xác); hoặc thêm cột formatted nếu muốn
+      return `${from},${to},${t.amount}`;
+    }).join('\n');
+    const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `settlement_${groupId}.csv`; a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="space-y-4">
@@ -62,12 +97,42 @@ export function SummaryPage() {
         )}
       </section>
 
-      {/* Placeholder for Day 7 Settlement list */}
       <section className="p-4 bg-white rounded-2xl shadow-sm">
-        <div className="font-semibold mb-1">Settlement</div>
-        <div className="text-sm text-gray-500">
-          Ngày 7 sẽ hiển thị gợi ý ai trả cho ai.
+        <div className="flex items-center justify-between mb-3">
+          <div className="font-semibold">Settlement</div>
+          <div className="flex gap-2">
+            <button onClick={copySettlement} className="px-3 py-2 rounded-xl bg-gray-900 text-white text-sm">
+              Copy
+            </button>
+            <button onClick={exportCSV} className="px-3 py-2 rounded-xl border text-sm">
+              Export CSV
+            </button>
+          </div>
         </div>
+
+        {!txns.length && (
+          <div className="text-sm text-gray-500">Không cần thanh toán thêm 🎉</div>
+        )}
+
+        {!!txns.length && (
+          <ul className="space-y-2">
+            {txns.map((t, i) => {
+              const from = members.find(m => m.id === t.from)?.name ?? t.from;
+              const to   = members.find(m => m.id === t.to)?.name   ?? t.to;
+              return (
+                <li key={i} className="px-3 py-3 rounded-xl border flex items-center justify-between">
+                  <div>
+                    <div className="text-sm">
+                      <span className="font-medium">{from}</span> → <span className="font-medium">{to}</span>
+                    </div>
+                    {!ok && <div className="text-[11px] text-amber-600">Warning: validation failed</div>}
+                  </div>
+                  <div className="font-semibold">{formatMoney(t.amount, currency!)}</div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </section>
     </div>
   );
