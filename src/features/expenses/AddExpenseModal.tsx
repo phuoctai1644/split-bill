@@ -8,18 +8,20 @@ import { Currency } from '@/services/db';
 
 type MemberLite = { id: string; name: string };
 
+type ExpensePayload = {
+  title: string; amount: number; currency: Currency; paidBy: string; date: string; note?: string;
+  splitMode: 'equal' | 'weights' | 'exact';
+  weights?: Record<string, number>;
+  exacts?: Record<string, number>;
+};
+
 export function AddExpenseModal({
   currency, members, onClose, onSave,
 }: {
   currency: Currency;
   members: MemberLite[];
   onClose: () => void;
-  onSave: (payload: {
-    title: string; amount: number; currency: Currency; paidBy: string; date: string; note?: string;
-    splitMode: 'equal' | 'weights' | 'exact';
-    weights?: Record<string, number>;
-    exacts?: Record<string, number>;
-  }) => void;
+  onSave: (payload: ExpensePayload) => void;
 }) {
   const [mode, setMode] = useState<'equal' | 'weights' | 'exact'>('equal');
 
@@ -33,15 +35,19 @@ export function AddExpenseModal({
         date: new Date().toISOString().slice(0, 10),
         note: '',
         splitMode: 'equal',
-        weights: Object.fromEntries(members.map(m => [m.id, 1])),
-        exactsMajor: Object.fromEntries(members.map(m => [m.id, 0])),
-      } as any,
+      } as ExpenseAnyForm,
     });
 
   // keep form splitMode synced with local mode toggle
   const onSwitch = (m: typeof mode) => {
     setMode(m);
-    setValue('splitMode', m as any);
+    setValue('splitMode', m);
+    if (m === 'weights') {
+      setValue('weights', Object.fromEntries(members.map(mem => [mem.id, 1])));
+    }
+    if (m === 'exact') {
+      setValue('exactsMajor', Object.fromEntries(members.map(mem => [mem.id, 0])));
+    }
   };
 
   const amountMinor = toMinor(Number(watch('amountMajor') || 0), currency);
@@ -67,7 +73,7 @@ export function AddExpenseModal({
 
   const submit = handleSubmit((v) => {
     // convert -> payload chuẩn DB
-    const payload: any = {
+    const payload: ExpensePayload = {
       title: v.title.trim(),
       amount: amountMinor,
       currency,

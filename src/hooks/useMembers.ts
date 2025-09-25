@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { membersRepo } from '@/services/repos/members.repo';
+import type { Member } from '@/services/db';
 
 export const useMembers = (groupId?: string) =>
   useQuery({
@@ -20,7 +21,7 @@ export const useCreateMember = (groupId: string) => {
 export const useUpdateMember = (groupId: string) => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, patch }: { id: string; patch: any }) => membersRepo.update(id, patch),
+    mutationFn: ({ id, patch }: { id: string; patch: Partial<Pick<Member, 'name' | 'alias'>> }) => membersRepo.update(id, patch),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['members', groupId] }),
   });
 };

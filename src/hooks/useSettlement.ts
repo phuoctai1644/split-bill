@@ -13,5 +13,5 @@ export function useSettlement(groupId?: string) {
     return { txns, ok };
   }, [balances]);
 
-  return { currency: group!.currency, members, balances, loading, ...result };
+  return { currency: group?.currency, members, balances, loading, ...result };
 }

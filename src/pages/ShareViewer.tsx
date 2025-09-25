@@ -3,6 +3,7 @@ import { decodeSnapshot, type Snapshot } from '@/utils/snapshot';
 import { formatMoney } from '@/utils/money';
 import { computeBalances } from '@/utils/balance';
 import { settle } from '@/utils/settlement';
+import type { Expense, Currency } from '@/services/db';
 
 export function ShareViewer() {
   const [data, setData] = useState<Snapshot | null>(null);
@@ -13,15 +14,15 @@ export function ShareViewer() {
     try {
       if (!hash) throw new Error('Không có dữ liệu chia sẻ');
       setData(decodeSnapshot(hash));
-    } catch (e: any) {
-      setError(e?.message ?? 'Lỗi đọc dữ liệu');
+    } catch (e: unknown) {
+      setError((e as Error)?.message ?? 'Lỗi đọc dữ liệu');
     }
   }, []);
 
   const computed = useMemo(() => {
     if (!data) return null;
     const ids = data.members.map(m => m.id);
-    const balances = computeBalances(data.expenses as any, ids);
+    const balances = computeBalances(data.expenses as Expense[], ids);
     const txns = settle(balances);
     return { balances, txns };
   }, [data]);
@@ -48,7 +49,7 @@ export function ShareViewer() {
               <li key={m.id} className="py-2 flex items-center justify-between">
                 <span>{m.name}</span>
                 <span className={(computed.balances[m.id] ?? 0) >= 0 ? 'text-emerald-600 font-medium' : 'text-rose-600 font-medium'}>
-                  {formatMoney(computed.balances[m.id] ?? 0, group.currency)}
+                  {formatMoney(computed.balances[m.id] ?? 0, group.currency as Currency)}
                 </span>
               </li>
             ))}
@@ -66,7 +67,7 @@ export function ShareViewer() {
                   <div className="text-sm">
                     <span className="font-medium">{nameOf(t.from)}</span> → <span className="font-medium">{nameOf(t.to)}</span>
                   </div>
-                  <div className="font-semibold">{formatMoney(t.amount, group.currency)}</div>
+                  <div className="font-semibold">{formatMoney(t.amount, group.currency as Currency)}</div>
                 </li>
               ))}
             </ul>

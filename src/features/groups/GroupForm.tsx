@@ -16,7 +16,7 @@ export function GroupFormModal({
 }) {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<GroupForm>({
     resolver: zodResolver(groupForm),
-    defaultValues: { name: initial?.name ?? '', currency: (initial?.currency as any) ?? 'VND' },
+    defaultValues: { name: initial?.name ?? '', currency: initial?.currency ?? 'VND' },
   });
 
   return (

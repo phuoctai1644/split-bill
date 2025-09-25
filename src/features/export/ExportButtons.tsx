@@ -15,7 +15,7 @@ export function ExportJSONButton({ groupId }: { groupId: string }) {
   return <button onClick={onExport} className="px-3 py-2 rounded-xl border text-sm">Export JSON</button>;
 }
 
-export function ExportCSVButton({ groupId, currency }: { groupId: string; currency: string }) {
+export function ExportCSVButton({ groupId }: { groupId: string; currency: string }) {
   const onExport = async () => {
     const [group, members, expenses] = await Promise.all([
       db.groups.get(groupId),
@@ -32,7 +32,7 @@ export function ExportCSVButton({ groupId, currency }: { groupId: string; curren
 
     // settlement.csv
     const ids = members.map(m => m.id);
-    const balances = computeBalances(expenses as any, ids);
+    const balances = computeBalances(expenses, ids);
     const txns = settle(balances);
     const stHeader = 'from,to,amountMinor\n';
     const stRows = txns.map(t => `${csv(nameId(t.from))},${csv(nameId(t.to))},${t.amount}`).join('\n');

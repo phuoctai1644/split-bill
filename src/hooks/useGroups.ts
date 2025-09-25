@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { groupsRepo } from '@/services/repos/groups.repo';
+import type { Group } from '@/services/db';
 
 export const useGroups = () =>
   useQuery({ queryKey: ['groups'], queryFn: groupsRepo.list });
@@ -25,7 +26,7 @@ export const useCreateGroup = () => {
 export const useUpdateGroup = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, patch }: { id: string; patch: any }) => groupsRepo.update(id, patch),
+    mutationFn: ({ id, patch }: { id: string; patch: Partial<Pick<Group, 'name' | 'currency'>> }) => groupsRepo.update(id, patch),
     onSuccess: (_res, { id }) => {
       qc.invalidateQueries({ queryKey: ['groups'] });
       qc.invalidateQueries({ queryKey: ['group', id] });

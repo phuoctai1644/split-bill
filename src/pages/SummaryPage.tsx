@@ -1,6 +1,5 @@
 import { useParams } from 'react-router-dom';
 import { useGroup } from '@/hooks/useGroups';
-import { useGroupBalances } from '@/hooks/useBalances';
 import { formatMoney } from '@/utils/money';
 import { sumPositive } from '@/utils/balance';
 import { useSettlement } from '@/hooks/useSettlement';
@@ -26,14 +25,11 @@ function ShareButton({ groupId }: { groupId: string }) {
 export function SummaryPage() {
   const { id: groupId } = useParams();
   const { data: group } = useGroup(groupId);
-  const { balances, members, loading } = useGroupBalances(groupId);
+  const { balances, members, loading, txns, ok, currency } = useSettlement(groupId);
 
   if (!group) return null;
 
   const totalPaid = sumPositive(balances);
-  const { txns, ok, currency } = useSettlement(groupId);
-
-  if (!group) return null;
 
   const copySettlement = async () => {
     const name = group.name;
@@ -79,7 +75,7 @@ export function SummaryPage() {
         <div className="p-4 bg-white rounded-2xl shadow-sm">
           <div className="text-xs text-gray-500">Tổng tiền đã trả</div>
           <div className="text-lg font-semibold">
-            {formatMoney(totalPaid, currency)}
+            {formatMoney(totalPaid, currency!)}
           </div>
         </div>
         <div className="p-4 bg-white rounded-2xl shadow-sm">
@@ -112,7 +108,7 @@ export function SummaryPage() {
                       : 'text-rose-600 font-medium'
                   }
                 >
-                  {formatMoney(balances[m.id] ?? 0, currency)}
+                  {formatMoney(balances[m.id] ?? 0, currency!)}
                 </span>
               </li>
             ))}
