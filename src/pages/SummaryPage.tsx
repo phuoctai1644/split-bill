@@ -4,6 +4,24 @@ import { useGroupBalances } from '@/hooks/useBalances';
 import { formatMoney } from '@/utils/money';
 import { sumPositive } from '@/utils/balance';
 import { useSettlement } from '@/hooks/useSettlement';
+import { buildGroupSnapshot } from '@/services/snapshot.service';
+import { encodeSnapshot } from '@/utils/snapshot';
+import { ExportCSVButton, ExportJSONButton } from '@/features/export/ExportButtons';
+
+function ShareButton({ groupId }: { groupId: string }) {
+  const onShare = async () => {
+    const snap = await buildGroupSnapshot(groupId);
+    const payload = encodeSnapshot(snap);
+    const url = `${location.origin}/share#${payload}`;
+    await navigator.clipboard.writeText(url);
+    alert('Đã copy link chia sẻ (readonly)');
+  };
+  return (
+    <button onClick={onShare} className="px-3 py-2 rounded-xl border text-sm">
+      Share (readonly)
+    </button>
+  );
+}
 
 export function SummaryPage() {
   const { id: groupId } = useParams();
@@ -21,7 +39,7 @@ export function SummaryPage() {
     const name = group.name;
     const lines = txns.map(t => {
       const from = members.find(m => m.id === t.from)?.name ?? t.from;
-      const to   = members.find(m => m.id === t.to)?.name   ?? t.to;
+      const to = members.find(m => m.id === t.to)?.name ?? t.to;
       return `${from} → ${to}: ${formatMoney(t.amount, currency!)}`;
     });
     const text = `Settlement cho "${name}":\n` + lines.join('\n');
@@ -38,7 +56,7 @@ export function SummaryPage() {
     const header = 'from,to,amount\n';
     const rows = txns.map(t => {
       const from = members.find(m => m.id === t.from)?.name ?? t.from;
-      const to   = members.find(m => m.id === t.to)?.name   ?? t.to;
+      const to = members.find(m => m.id === t.to)?.name ?? t.to;
       // xuất số minor (chính xác); hoặc thêm cột formatted nếu muốn
       return `${from},${to},${t.amount}`;
     }).join('\n');
@@ -52,6 +70,11 @@ export function SummaryPage() {
   return (
     <div className="space-y-4">
       {/* Top metrics */}
+      <div className="flex items-center justify-center gap-3">
+        <ShareButton groupId={group.id} />
+        <ExportJSONButton groupId={group.id} />
+        <ExportCSVButton groupId={group.id} currency={group.currency} />
+      </div>
       <section className="grid grid-cols-2 gap-3">
         <div className="p-4 bg-white rounded-2xl shadow-sm">
           <div className="text-xs text-gray-500">Tổng tiền đã trả</div>
@@ -118,7 +141,7 @@ export function SummaryPage() {
           <ul className="space-y-2">
             {txns.map((t, i) => {
               const from = members.find(m => m.id === t.from)?.name ?? t.from;
-              const to   = members.find(m => m.id === t.to)?.name   ?? t.to;
+              const to = members.find(m => m.id === t.to)?.name ?? t.to;
               return (
                 <li key={i} className="px-3 py-3 rounded-xl border flex items-center justify-between">
                   <div>
