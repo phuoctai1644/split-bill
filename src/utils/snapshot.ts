@@ -1,4 +1,5 @@
-  import { deflateRaw, inflateRaw } from 'pako';
+import { deflateRaw, inflateRaw } from 'pako';
+// import { TextDecoder, TextEncoder } from 'node:util';
 
 const toB64U = (bytes: Uint8Array) =>
   btoa(String.fromCharCode(...bytes))
@@ -18,7 +19,7 @@ export type Snapshot = {
   members: Array<{ id: string; name: string; alias?: string; groupId: string }>;
   expenses: Array<{
     id: string; groupId: string; title: string; amount: number; currency: string;
-    paidBy: string; date: string; note?: string; splitMode: 'equal'|'weights'|'exact';
+    paidBy: string; date: string; note?: string; splitMode: 'equal' | 'weights' | 'exact';
     weights?: Record<string, number>; exacts?: Record<string, number>;
   }>;
 };

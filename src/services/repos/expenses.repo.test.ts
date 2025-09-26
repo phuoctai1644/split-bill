@@ -1,5 +1,6 @@
-import { db } from '@/services/db';
+import { db } from '../db';
 import { expensesRepo } from './expenses.repo';
+
 beforeEach(async () => { await db.delete(); await db.open(); });
 test('listByGroup filters correctly', async () => {
   await expensesRepo.create({ groupId: 'g1', title: 'A', amount: 100, currency: 'VND', paidBy: 'u1', date: '2025-01-01', splitMode: 'equal' });

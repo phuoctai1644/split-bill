@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Currency } from '@/services/db';
+import { Currency } from '../../services/db';
 
 export const groupForm = z.object({
   name: z.string().trim().min(1, 'Nhập tên nhóm'),
