@@ -1,1 +1,6 @@
 @import "tailwindcss";
+
+/* Set project's base font size to 14px so 1rem == 14px */
+html {
+  font-size: 14px;
+}

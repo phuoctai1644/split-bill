@@ -18,10 +18,10 @@ export function MemberInlineForm({
   });
 
   return (
-    <form onSubmit={submit} className="flex gap-2">
+    <form onSubmit={submit} className="flex flex-wrap gap-2">
       <input placeholder="Tên thành viên" className="flex-1 px-3 py-2 rounded-xl border" {...register('name')} />
-      <input placeholder="Alias (tuỳ chọn)" className="w-36 px-3 py-2 rounded-xl border" {...register('alias')} />
-      <button disabled={isSubmitting} className="px-3 py-2 rounded-xl bg-gray-900 text-white">Thêm</button>
+      <input placeholder="Alias (tuỳ chọn)" className="flex-1 w-36 px-3 py-2 rounded-xl border" {...register('alias')} />
+      <button disabled={isSubmitting} className="w-full px-3 py-2 rounded-xl bg-gray-900 text-white">Thêm</button>
       {errors.name && <div className="text-xs text-rose-600 self-center">{errors.name.message}</div>}
     </form>
   );
