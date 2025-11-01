@@ -30,7 +30,16 @@ export function GroupsList() {
             </div>
             <div className="flex gap-2">
               <Link to={`/groups/${g.id}/expenses`} className="px-3 py-2 rounded-xl bg-gray-900 text-white text-sm">Mở</Link>
-              <button onClick={() => deleteGroup.mutate(g.id)} className="px-3 py-2 rounded-xl border text-sm">Xoá</button>
+              <button
+                onClick={() => {
+                  if (window.confirm('Bạn có chắc chắn muốn xoá nhóm này?')) {
+                    deleteGroup.mutate(g.id);
+                  }
+                }}
+                className="px-3 py-2 rounded-xl border text-sm"
+              >
+                Xoá
+              </button>
             </div>
           </li>
         ))}

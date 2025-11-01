@@ -37,7 +37,7 @@ export function AppShell({
                     }`}
                   >
                     {t.icon}
-                    <span className="text-[11px]">{t.label}</span>
+                    <span>{t.label}</span>
                   </Link>
                 );
               })}
