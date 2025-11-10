@@ -63,7 +63,11 @@ export function GroupLayout() {
                   Sửa
                 </button>
                 <button
-                  onClick={() => deleteMember.mutate(m.id)}
+                  onClick={() => {
+                    if (confirm('Bạn có chắc chắn muốn xoá thành viên này?')) {
+                      deleteMember.mutate(m.id);
+                    }
+                  }}
                   className="px-3 py-1.5 rounded-xl border text-sm text-red-600"
                 >
                   Xoá

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { expenseAnyForm, type ExpenseAnyForm } from './schemas';
-import { toMinor, formatMoney } from '@/utils/money';
+import { toMinor, formatMoney, formatNumberWithCommas, removeCommas, isValidNumberInput } from '@/utils/money';
 import { equalSplit, weightsSplit, sumEquals } from '@/utils/split';
 import { Currency } from '@/services/db';
 
@@ -24,6 +24,8 @@ export function AddExpenseModal({
   onSave: (payload: ExpensePayload) => void;
 }) {
   const [mode, setMode] = useState<'equal' | 'weights' | 'exact'>('equal');
+  const [displayAmount, setDisplayAmount] = useState<string>('');
+  const [displayExacts, setDisplayExacts] = useState<Record<string, string>>({});
 
   const { register, handleSubmit, watch, setValue, formState: { errors, isSubmitting } } =
     useForm<ExpenseAnyForm>({
@@ -47,6 +49,43 @@ export function AddExpenseModal({
     }
     if (m === 'exact') {
       setValue('exactsMajor', Object.fromEntries(members.map(mem => [mem.id, 0])));
+    }
+  };
+
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value;
+
+    // Only allow valid number input
+    if (inputValue === '' || isValidNumberInput(inputValue)) {
+      const rawValue = removeCommas(inputValue);
+      const numericValue = parseFloat(rawValue) || 0;
+
+      // Update form state with numeric value
+      setValue('amountMajor', numericValue);
+
+      // Update display with formatted value
+      if (rawValue === '' || rawValue === '0') {
+        setDisplayAmount('');
+      } else {
+        setDisplayAmount(formatNumberWithCommas(rawValue));
+      }
+    }
+  };
+
+  const handleExactChange = (memberId: string, value: string) => {
+    // Only allow valid number input
+    if (value === '' || isValidNumberInput(value)) {
+      const rawValue = removeCommas(value);
+      const numericValue = parseFloat(rawValue) || 0;
+
+      // Update form state with numeric value
+      setValue(`exactsMajor.${memberId}` as const, numericValue);
+
+      // Update display with formatted value
+      setDisplayExacts(prev => ({
+        ...prev,
+        [memberId]: rawValue === '' || rawValue === '0' ? '' : formatNumberWithCommas(rawValue)
+      }));
     }
   };
 
@@ -104,8 +143,15 @@ export function AddExpenseModal({
         <div className="grid grid-cols-2 gap-3 mt-3">
           <div>
             <label className="text-sm text-gray-600">Số tiền ({currency})</label>
-            <input type="number" step="any" className="w-full mt-1 px-3 py-2 rounded-xl border"
-              {...register('amountMajor', { valueAsNumber: true })} />
+            <input
+              type="text"
+              inputMode="decimal"
+              className="w-full mt-1 px-3 py-2 rounded-xl border"
+              value={displayAmount}
+              onChange={handleAmountChange}
+              placeholder="0"
+            />
+            <input type="hidden" {...register('amountMajor', { valueAsNumber: true })} />
             {errors.amountMajor && <div className="text-xs text-rose-600 mt-1">{errors.amountMajor.message}</div>}
           </div>
           <div>
@@ -152,9 +198,8 @@ export function AddExpenseModal({
               {members.map((m) => (
                 <div key={m.id} className="flex flex-col gap-1">
                   <label className="text-xs text-gray-500">{m.name}</label>
-                  <input type="number" inputMode="numeric" className="px-2 py-1 rounded-lg border"
-                    {...register(`weights.${m.id}` as const, { valueAsNumber: true, min: 0 })}
-                    onChange={(e) => setValue(`weights.${m.id}`, Number(e.target.value))} />
+                  <input type="number" inputMode="decimal" className="px-2 py-1 rounded-lg border"
+                    {...register(`weights.${m.id}` as const, { valueAsNumber: true, min: 0 })} step="any" />
                 </div>
               ))}
             </div>
@@ -170,9 +215,15 @@ export function AddExpenseModal({
               {members.map((m) => (
                 <div key={m.id} className="flex flex-col gap-1">
                   <label className="text-xs text-gray-500">{m.name}</label>
-                  <input type="number" step="any" className="px-2 py-1 rounded-lg border"
-                    {...register(`exactsMajor.${m.id}` as const, { valueAsNumber: true, min: 0 })}
-                    onChange={(e) => setValue(`exactsMajor.${m.id}`, Number(e.target.value))} />
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    className="px-2 py-1 rounded-lg border"
+                    value={displayExacts[m.id] || ''}
+                    onChange={(e) => handleExactChange(m.id, e.target.value)}
+                    placeholder="0"
+                  />
+                  <input type="hidden" {...register(`exactsMajor.${m.id}` as const, { valueAsNumber: true, min: 0 })} />
                 </div>
               ))}
             </div>
