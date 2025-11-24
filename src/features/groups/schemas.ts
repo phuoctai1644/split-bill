@@ -12,3 +12,9 @@ export const memberForm = z.object({
   alias: z.string().trim().optional(),
 });
 export type MemberForm = z.infer<typeof memberForm>;
+
+export const memberEditForm = z.object({
+  name: z.string().trim().min(1, 'Nhập tên'),
+  alias: z.string().trim().optional(),
+});
+export type MemberEditForm = z.infer<typeof memberEditForm>;
