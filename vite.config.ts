@@ -24,19 +24,26 @@ export default defineConfig({
         ]
       },
       workbox: {
-        navigateFallback: '/offline.html',
+        navigateFallback: '/index.html',
+        navigateFallbackAllowlist: [/^\/(?!(api|_|offline\.html|.*\.(png|jpg|jpeg|svg|gif|webp|ico|css|js|woff2?|ttf|eot))).*$/],
         runtimeCaching: [
           {
             urlPattern: ({ request }) => request.destination === 'document',
             handler: 'NetworkFirst',
-            options: { cacheName: 'pages' }
+            options: {
+              cacheName: 'pages',
+              networkTimeoutSeconds: 2
+            }
           },
           {
             urlPattern: ({ request }) => ['style', 'script', 'worker'].includes(request.destination),
             handler: 'StaleWhileRevalidate',
             options: { cacheName: 'assets' }
-          },
+          }
         ],
+        cleanupOutdatedCaches: true,
+        skipWaiting: false,
+        clientsClaim: false
       },
     }),
     tailwindcss(),
