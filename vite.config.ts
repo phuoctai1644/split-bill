@@ -25,14 +25,14 @@ export default defineConfig({
       },
       workbox: {
         navigateFallback: '/index.html',
-        navigateFallbackAllowlist: [/^\/(?!(api|_|offline\.html|.*\.(png|jpg|jpeg|svg|gif|webp|ico|css|js|woff2?|ttf|eot))).*$/],
+        navigateFallbackAllowlist: [/^(?!.*\/(api|_|offline\.html)$)(?!.*\.(png|jpg|jpeg|svg|gif|webp|ico|css|js|woff2?|ttf|eot)$)/],
         runtimeCaching: [
           {
             urlPattern: ({ request }) => request.destination === 'document',
             handler: 'NetworkFirst',
             options: {
               cacheName: 'pages',
-              networkTimeoutSeconds: 2
+              networkTimeoutSeconds: 5
             }
           },
           {
