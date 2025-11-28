@@ -3,7 +3,9 @@ import { AppShell } from '@/app/AppShell';
 import { useGroup } from '@/hooks/useGroups';
 import { useMembers, useCreateMember, useDeleteMember, useUpdateMember } from '@/hooks/useMembers';
 import { MemberInlineForm } from '@/features/members/MemberInlineForm';
-import { useMemo } from 'react';
+import { EditMemberModal } from '@/features/members/EditMemberModal';
+import { useMemo, useState } from 'react';
+import type { Member } from '@/services/db';
 
 export function GroupLayout() {
   const { id } = useParams();
@@ -13,10 +15,24 @@ export function GroupLayout() {
   const deleteMember = useDeleteMember(id!);
   const updateMember = useUpdateMember(id!);
 
+  const [editingMember, setEditingMember] = useState<Member | null>(null);
+
   const isDup = useMemo(
     () => (name: string) => members.some(m => m.name.toLowerCase() === name.trim().toLowerCase()),
     [members]
   );
+
+  const handleSaveMember = (payload: { id: string; name: string; alias?: string }) => {
+    updateMember.mutate({
+      id: payload.id,
+      patch: { name: payload.name, alias: payload.alias }
+    });
+    setEditingMember(null);
+  };
+
+  const handleCloseEditModal = () => {
+    setEditingMember(null);
+  };
 
   if (!group) {
     return (
@@ -53,12 +69,8 @@ export function GroupLayout() {
               </div>
               <div className="flex gap-2">
                 <button
-                  onClick={() => {
-                    const name = prompt('Tên mới', m.name) ?? m.name;
-                    const alias = prompt('Alias (tuỳ chọn)', m.alias ?? '') ?? m.alias ?? '';
-                    updateMember.mutate({ id: m.id, patch: { name, alias } });
-                  }}
-                  className="px-3 py-1.5 rounded-xl border text-sm"
+                  onClick={() => setEditingMember(m)}
+                  className="px-3 py-1.5 rounded-xl border text-sm hover:bg-gray-50 transition-colors"
                 >
                   Sửa
                 </button>
@@ -68,7 +80,7 @@ export function GroupLayout() {
                       deleteMember.mutate(m.id);
                     }
                   }}
-                  className="px-3 py-1.5 rounded-xl border text-sm text-red-600"
+                  className="px-3 py-1.5 rounded-xl border text-sm text-red-600 hover:bg-red-50 transition-colors"
                 >
                   Xoá
                 </button>
@@ -79,6 +91,13 @@ export function GroupLayout() {
       </section>
 
       <Outlet />
+
+      {/* Edit Member Modal */}
+      <EditMemberModal
+        member={editingMember}
+        onClose={handleCloseEditModal}
+        onSave={handleSaveMember}
+      />
     </AppShell>
   );
 }
