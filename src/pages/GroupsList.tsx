@@ -21,7 +21,19 @@ export function GroupsList() {
 
       <ul className="space-y-3">
         {groups.map((g) => (
-          <li key={g.id} className="p-4 bg-white rounded-2xl shadow-sm flex items-center justify-between">
+          <li
+            key={g.id}
+            className="p-4 bg-white rounded-2xl shadow-sm flex items-center justify-between cursor-pointer"
+            onClick={() => nav(`/groups/${g.id}`)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                nav(`/groups/${g.id}`);
+              }
+            }}
+          >
             <div>
               <div className="font-medium">{g.name}</div>
               <div className="text-xs text-gray-500 mt-0.5">
@@ -29,9 +41,16 @@ export function GroupsList() {
               </div>
             </div>
             <div className="flex gap-2">
-              <Link to={`/groups/${g.id}/expenses`} className="px-3 py-2 rounded-xl bg-gray-900 text-white text-sm">Mở</Link>
+              <Link
+                to={`/groups/${g.id}/expenses`}
+                className="px-3 py-2 rounded-xl bg-gray-900 text-white text-sm"
+                onClick={(e) => e.stopPropagation()}
+              >
+                Mở
+              </Link>
               <button
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   if (window.confirm('Bạn có chắc chắn muốn xoá nhóm này?')) {
                     deleteGroup.mutate(g.id);
                   }
