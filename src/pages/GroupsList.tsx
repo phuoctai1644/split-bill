@@ -25,6 +25,14 @@ export function GroupsList() {
             key={g.id}
             className="p-4 bg-white rounded-2xl shadow-sm flex items-center justify-between cursor-pointer"
             onClick={() => nav(`/groups/${g.id}`)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                nav(`/groups/${g.id}`);
+              }
+            }}
           >
             <div>
               <div className="font-medium">{g.name}</div>
