@@ -1,15 +1,18 @@
 import { AppShell } from '@/app/AppShell';
-import { useGroups, useCreateGroup, useDeleteGroup } from '@/hooks/useGroups';
+import { useGroups, useCreateGroup, useDeleteGroup, useUpdateGroup } from '@/hooks/useGroups';
 import { GroupFormModal } from '@/features/groups/GroupForm';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useState } from 'react';
+import type { Group } from '@/services/db';
 
 export function GroupsList() {
   const nav = useNavigate();
   const { data: groups = [] } = useGroups();
   const createGroup = useCreateGroup();
   const deleteGroup = useDeleteGroup();
+  const updateGroup = useUpdateGroup();
   const [show, setShow] = useState(false);
+  const [editingGroup, setEditingGroup] = useState<Group | null>(null);
 
   return (
     <AppShell title="Groups">
@@ -21,26 +24,42 @@ export function GroupsList() {
 
       <ul className="space-y-3">
         {groups.map((g) => (
-          <li key={g.id} className="p-4 bg-white rounded-2xl shadow-sm flex items-center justify-between">
-            <div>
-              <div className="font-medium">{g.name}</div>
-              <div className="text-xs text-gray-500 mt-0.5">
-                {new Date(g.createdAt).toLocaleDateString('vi-VN')} • {g.currency}
+          <li key={g.id} className="bg-white rounded-2xl shadow-sm">
+            <Link
+              to={`/groups/${g.id}`}
+              className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50 rounded-2xl transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              <div>
+                <div className="font-medium">{g.name}</div>
+                <div className="text-xs text-gray-500 mt-0.5">
+                  {new Date(g.createdAt).toLocaleDateString('vi-VN')} • {g.currency}
+                </div>
               </div>
-            </div>
-            <div className="flex gap-2">
-              <Link to={`/groups/${g.id}/expenses`} className="px-3 py-2 rounded-xl bg-gray-900 text-white text-sm">Mở</Link>
-              <button
-                onClick={() => {
-                  if (window.confirm('Bạn có chắc chắn muốn xoá nhóm này?')) {
-                    deleteGroup.mutate(g.id);
-                  }
-                }}
-                className="px-3 py-2 rounded-xl border text-sm"
-              >
-                Xoá
-              </button>
-            </div>
+              <div className="flex gap-2">
+                <button
+                  className="px-3 py-2 rounded-xl bg-gray-900 text-white text-sm hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setEditingGroup(g);
+                  }}
+                >
+                  Sửa
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (window.confirm('Bạn có chắc chắn muốn xoá nhóm này?')) {
+                      deleteGroup.mutate(g.id);
+                    }
+                  }}
+                  className="px-3 py-2 rounded-xl border text-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                >
+                  Xoá
+                </button>
+              </div>
+            </Link>
           </li>
         ))}
       </ul>
@@ -58,6 +77,17 @@ export function GroupsList() {
             const g = await createGroup.mutateAsync(values);
             setShow(false);
             nav(`/groups/${g.id}/expenses`);
+          }}
+        />
+      )}
+
+      {editingGroup && (
+        <GroupFormModal
+          initial={{ name: editingGroup.name, currency: editingGroup.currency }}
+          onClose={() => setEditingGroup(null)}
+          onSubmit={async (values) => {
+            await updateGroup.mutateAsync({ id: editingGroup.id, patch: values });
+            setEditingGroup(null);
           }}
         />
       )}
