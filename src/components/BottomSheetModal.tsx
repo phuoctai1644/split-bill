@@ -50,9 +50,8 @@ export function BottomSheetModal({
             <div className="font-semibold mb-3">{title}</div>
           )}
 
-          {children}
-
-          {footer && footer}
+          { children }
+          { footer }
         </form>
       ) : (
         <div
@@ -63,9 +62,8 @@ export function BottomSheetModal({
             <div className="font-semibold mb-3">{title}</div>
           )}
 
-          {children}
-
-          {footer && footer}
+          { children }
+          { footer }
         </div>
       )}
     </div>

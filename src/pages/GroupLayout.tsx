@@ -23,6 +23,14 @@ export function GroupLayout() {
   );
 
   const handleSaveMember = (payload: { id: string; name: string; alias?: string }) => {
+    const currentMember = members.find(m => m.id === payload.id);
+    const isNameChanged = currentMember && currentMember.name.toLowerCase() !== payload.name.trim().toLowerCase();
+
+    if (isNameChanged && isDup(payload.name)) {
+      alert('Tên thành viên đã tồn tại');
+      return;
+    }
+
     updateMember.mutate({
       id: payload.id,
       patch: { name: payload.name, alias: payload.alias }

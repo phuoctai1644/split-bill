@@ -7,14 +7,17 @@ export const groupForm = z.object({
 });
 export type GroupForm = z.infer<typeof groupForm>;
 
-export const memberForm = z.object({
-  name: z.string().trim().min(1, 'Nhập tên thành viên'),
+const baseMemberSchema = z.object({
+  name: z.string().trim(),
   alias: z.string().trim().optional(),
+});
+
+export const memberForm = baseMemberSchema.extend({
+  name: z.string().trim().min(1, 'Nhập tên thành viên'),
 });
 export type MemberForm = z.infer<typeof memberForm>;
 
-export const memberEditForm = z.object({
+export const memberEditForm = baseMemberSchema.extend({
   name: z.string().trim().min(1, 'Nhập tên'),
-  alias: z.string().trim().optional(),
 });
 export type MemberEditForm = z.infer<typeof memberEditForm>;
