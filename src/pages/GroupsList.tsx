@@ -1,7 +1,7 @@
 import { AppShell } from '@/app/AppShell';
 import { useGroups, useCreateGroup, useDeleteGroup, useUpdateGroup } from '@/hooks/useGroups';
 import { GroupFormModal } from '@/features/groups/GroupForm';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useState } from 'react';
 import type { Group } from '@/services/db';
 
@@ -24,39 +24,42 @@ export function GroupsList() {
 
       <ul className="space-y-3">
         {groups.map((g) => (
-          <li
-            key={g.id}
-            className="p-4 bg-white rounded-2xl shadow-sm flex items-center justify-between cursor-pointer"
-            onClick={() => nav(`/groups/${g.id}`)}
-          >
-            <div>
-              <div className="font-medium">{g.name}</div>
-              <div className="text-xs text-gray-500 mt-0.5">
-                {new Date(g.createdAt).toLocaleDateString('vi-VN')} • {g.currency}
+          <li key={g.id} className="bg-white rounded-2xl shadow-sm">
+            <Link
+              to={`/groups/${g.id}`}
+              className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50 rounded-2xl transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              <div>
+                <div className="font-medium">{g.name}</div>
+                <div className="text-xs text-gray-500 mt-0.5">
+                  {new Date(g.createdAt).toLocaleDateString('vi-VN')} • {g.currency}
+                </div>
               </div>
-            </div>
-            <div className="flex gap-2">
-              <button
-                className="px-3 py-2 rounded-xl bg-gray-900 text-white text-sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setEditingGroup(g);
-                }}
-              >
-                Sửa
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (window.confirm('Bạn có chắc chắn muốn xoá nhóm này?')) {
-                    deleteGroup.mutate(g.id);
-                  }
-                }}
-                className="px-3 py-2 rounded-xl border text-sm"
-              >
-                Xoá
-              </button>
-            </div>
+              <div className="flex gap-2">
+                <button
+                  className="px-3 py-2 rounded-xl bg-gray-900 text-white text-sm hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setEditingGroup(g);
+                  }}
+                >
+                  Sửa
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (window.confirm('Bạn có chắc chắn muốn xoá nhóm này?')) {
+                      deleteGroup.mutate(g.id);
+                    }
+                  }}
+                  className="px-3 py-2 rounded-xl border text-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                >
+                  Xoá
+                </button>
+              </div>
+            </Link>
           </li>
         ))}
       </ul>

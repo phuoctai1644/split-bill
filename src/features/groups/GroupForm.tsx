@@ -36,11 +36,10 @@ export function GroupFormModal({
         <select
           {...register('currency')}
           disabled={isEdit}
+          aria-label={isEdit ? "Currency field is disabled and cannot be changed" : undefined}
           className={`
             w-full mt-1 px-3 py-2 rounded-xl border 
-            ${isEdit
-              ? 'bg-gray-100 text-gray-600 border-gray-300 cursor-not-allowed'
-              : 'bg-white'}
+            ${isEdit ? 'bg-gray-100 text-gray-600 border-gray-300 cursor-not-allowed' : 'bg-white'}
           `}
         >
           {CURRENCIES.map((c) => (
