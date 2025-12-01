@@ -14,6 +14,7 @@ export function GroupFormModal({
   onSubmit: (values: GroupForm) => void;
   onClose: () => void;
 }) {
+  const isEdit = !!initial;
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<GroupForm>({
     resolver: zodResolver(groupForm),
     defaultValues: { name: initial?.name ?? '', currency: initial?.currency ?? 'VND' },
@@ -32,8 +33,18 @@ export function GroupFormModal({
         {errors.name && <div className="text-xs text-rose-600 mt-1">{errors.name.message}</div>}
 
         <label className="text-sm text-gray-600 mt-3 block">Currency</label>
-        <select className="w-full mt-1 px-3 py-2 rounded-xl border bg-white" {...register('currency')}>
-          {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
+        <select
+          {...register('currency')}
+          disabled={isEdit}
+          aria-label={isEdit ? "Currency field is disabled and cannot be changed" : undefined}
+          className={`
+            w-full mt-1 px-3 py-2 rounded-xl border 
+            ${isEdit ? 'bg-gray-100 text-gray-600 border-gray-300 cursor-not-allowed' : 'bg-white'}
+          `}
+        >
+          {CURRENCIES.map((c) => (
+            <option key={c} value={c}>{c}</option>
+          ))}
         </select>
 
         <div className="flex gap-2 mt-4">
